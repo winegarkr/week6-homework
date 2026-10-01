@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Healthcare Workplace Violence</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #f4f3f0;
+  --surface-1: #fcfcfb;
+  --border: #e2e0da;
+  --grid: #ebe9e4;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #77756f;
+  --series-1: #2a78d6;
+  --series-1-soft: #b7d3f6;
+  --context: #c9c7c0;
+  --accent-ring: #fcfcfb;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #111110;
+    --surface-1: #1a1a19;
+    --border: #33332f;
+    --grid: #2a2a27;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #9a998f;
+    --series-1: #3987e5;
+    --series-1-soft: #184f95;
+    --context: #4a4a45;
+    --accent-ring: #1a1a19;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #111110;
+  --surface-1: #1a1a19;
+  --border: #33332f;
+  --grid: #2a2a27;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #9a998f;
+  --series-1: #3987e5;
+  --series-1-soft: #184f95;
+  --context: #4a4a45;
+  --accent-ring: #1a1a19;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--surface-0); color: var(--text-primary);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 48px; }
+header h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+header p { margin: 0; color: var(--text-secondary); max-width: 760px; }
+.theme-btn {
+  float: right; background: var(--surface-1); color: var(--text-secondary);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; font-size: 13px;
+}
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 24px 0; }
+.kpi { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpi .v { font-size: 32px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpi .l { color: var(--text-secondary); font-size: 13px; margin-top: 6px; }
+.kpi .s { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.card h2 { font-size: 17px; margin: 0 0 2px; }
+.card .sub { color: var(--text-secondary); font-size: 13px; margin: 0 0 14px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-bottom: 14px; font-size: 14px; color: var(--text-secondary); }
+.controls label { display: flex; gap: 8px; align-items: center; }
+select {
+  font: inherit; color: var(--text-primary); background: var(--surface-1);
+  border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px;
+}
+.grid2 { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
+@media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--text-secondary); font-size: 12px; }
+.bar-row { cursor: pointer; }
+.bar-row:hover .bar-hit { fill: var(--grid); }
+.bar-row:focus { outline: none; }
+.bar-row:focus-visible .bar-hit { stroke: var(--series-1); stroke-width: 2; }
+.bar-row.sel text.lbl { fill: var(--text-primary); font-weight: 600; }
+.tip {
+  position: fixed; pointer-events: none; z-index: 10; background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12); opacity: 0; transition: opacity .1s; max-width: 280px;
+}
+.tip b { font-variant-numeric: tabular-nums; }
+.detail-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 0; }
+.detail-stats div { border-top: 1px solid var(--border); padding-top: 8px; }
+.detail-stats .v { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.detail-stats .l { font-size: 12px; color: var(--text-muted); }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); margin-top: 8px; flex-wrap: wrap; }
+.legend span::before { content: ""; display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 6px; background: var(--series-1); }
+.legend span.ctx::before { background: var(--context); }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 8px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; white-space: normal; min-width: 220px; }
+th { color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--surface-1); }
+tr.sel td { background: var(--grid); }
+tbody tr { cursor: pointer; }
+td.hl { color: var(--series-1); font-weight: 600; }
+.def-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+@media (max-width: 860px) { .def-grid { grid-template-columns: 1fr; } }
+.defs h3 { font-size: 14px; margin: 0 0 6px; }
+.defs p { font-size: 13px; color: var(--text-secondary); margin: 0 0 8px; }
+.defs p b { color: var(--text-primary); }
+.defs .src { font-size: 12px; color: var(--text-muted); }
+.defs .note { border-top: 1px solid var(--border); padding-top: 10px; margin: 8px 0 0; }
+.notes { color: var(--text-secondary); font-size: 13px; }
+.notes li { margin-bottom: 4px; }
+a { color: var(--series-1); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <button class="theme-btn" id="themeBtn" type="button">Toggle dark mode</button>
+    <h1>Workplace violence against healthcare workers</h1>
+    <p>Injuries from intentional violence by another person, per 10,000 full-time workers, by U.S. healthcare facility type, 2011 to 2021/2022. Pick a year for the big picture, then click any facility to drill down year by year.</p>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="card defs">
+    <h2>What counts as a violent event?</h2>
+    <p class="sub">Definitions differ by source. The numbers on this page use the narrowest one: the first definition below.</p>
+    <div class="def-grid">
+      <div>
+        <h3>Counted in this data</h3>
+        <p>The Bureau of Labor Statistics counts a case when an employer records a work injury caused by <b>"intentional injury by other person"</b> (event code 111). It's counted only if the worker missed <b>at least one day of work</b>.</p>
+        <p>Examples include hitting, kicking, beating or shoving; stabbing or cutting; shooting; strangulation; rape or sexual assault; and threats or verbal assault that led to an injury or illness.</p>
+        <p class="src">Source: <a href="https://www.bls.gov/iif/definitions/oiics-manual-2010-section-3-4.pdf">BLS injury classification manual (OIICS)</a></p>
+      </div>
+      <div>
+        <h3>Workplace violence</h3>
+        <p><b>OSHA:</b> "any act or threat of physical violence, harassment, intimidation, or other threatening disruptive behavior that occurs at the work site."</p>
+        <p><b>NIOSH:</b> "violent acts (including physical assaults and threats of assaults) directed toward persons at work or on duty."</p>
+        <p class="src">Sources: OSHA, as quoted in Lombardi et al. 2024; NIOSH, as quoted in <a href="https://mhaonline.org/wp-content/uploads/2024/05/joint-commission-sentinel-event-alert-issue-59.pdf">Joint Commission Sentinel Event Alert 59</a> (2018)</p>
+      </div>
+      <div>
+        <h3>Safety event and sentinel event</h3>
+        <p>Hospitals report incidents as <b>safety events</b>. The most serious are <b>sentinel events</b>: a patient safety event that results in death, permanent harm, or severe temporary harm.</p>
+        <p>The Joint Commission counts "rape, assault (leading to death, permanent harm, or severe temporary harm), or homicide of a patient, staff member, licensed independent practitioner, visitor, or vendor while on site" as a sentinel event.</p>
+        <p class="src">Source: <a href="https://mhaonline.org/wp-content/uploads/2024/05/joint-commission-sentinel-event-alert-issue-59.pdf">Joint Commission Sentinel Event Alert 59, April 2018</a></p>
+      </div>
+    </div>
+    <p class="note">Why it matters: verbal abuse, threats and assaults that cause no missed workdays are not in these numbers. Read these rates as the most serious cases only; worker surveys report far more violence than employer injury records show.</p>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Facility types ranked</h2>
+      <p class="sub" id="rankSub"></p>
+      <div class="controls">
+        <label>Year <select id="yearSel"></select></label>
+        <label><input type="checkbox" id="hideOutlier"> Hide psychiatric hospitals (much larger scale)</label>
+      </div>
+      <div id="bars"></div>
+    </section>
+
+    <section class="card">
+      <h2 id="detailTitle">Drill-down</h2>
+      <p class="sub" id="detailSub">Year-by-year rate for the selected facility type. Gray lines are the other facility types.</p>
+      <div id="line"></div>
+      <div class="legend"><span id="legSel">Selected facility</span><span class="ctx">Other facility types</span></div>
+      <div class="detail-stats" id="detailStats"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>All data</h2>
+    <p class="sub">Click a column header to sort, or a row to drill down. The selected year is highlighted. *Change compares the 2011-2013 average with the 2018-2020 average; changes under 10% show as "About flat."</p>
+    <div class="table-wrap"><table id="tbl"></table></div>
+  </section>
+
+  <section class="card notes">
+    <h2>About the data</h2>
+    <ul>
+      <li><b>Source:</b> Lombardi B, Jensen T, Galloway E, Fraher E. "Trends in workplace violence for health care occupations and facilities over the last 10 years." <i>Health Affairs Scholar</i>. 2024;2(12):qxae134, Table 1. <a href="https://doi.org/10.1093/haschl/qxae134">doi.org/10.1093/haschl/qxae134</a>. The authors built it from the Bureau of Labor Statistics Survey of Occupational Injuries and Illnesses.</li>
+      <li><b>Measure:</b> injuries with at least one day away from work caused by an intentional injury by another person, per 10,000 full-time workers. Every number on this page uses this same measure, including the headline comparison with all private industry (<a href="https://www.bls.gov/iif/factsheets/workplace-violence-healthcare-2018.htm">BLS fact sheet, 2018</a>).</li>
+      <li><b>Change</b> compares 3-year averages (2011-2013 vs. 2018-2020, the latest three single years) instead of single years, so one unusual year can't drive the result. 2021/22 is a two-year period, so it is shown but not used for change. 2020 was a pandemic year; using 2017-2019 instead still shows most facility types rising (9 of 12).</li>
+    </ul>
+    <h2 style="margin-top:16px">Known limits and possible bias</h2>
+    <p class="sub">These can't be removed from the data, so read the numbers with them in mind.</p>
+    <ul>
+      <li><b>Undercounting:</b> cases come from employer injury records. Violence that is never reported, or that causes no missed workday (most verbal abuse and threats), is not counted. Reporting also differs among staff; younger nurses are more likely to report (<a href="https://www.sciencedirect.com/science/article/abs/pii/S0029655424001581">Friese et al., 2024</a>). True rates are higher, and the gap may not be the same in every setting.</li>
+      <li><b>Reporting culture can look like a trend:</b> a rising rate can mean more violence, better reporting, or both. This data can't tell them apart.</li>
+      <li><b>Missing facility types:</b> six types with blank years in Table 1 are left out, so no value is guessed: offices of physicians, offices of mental health physicians, offices of other health practitioners, medical and diagnostic laboratories, community food and housing services, and child day care. Totals and counts on this page cover only the 12 shown.</li>
+      <li><b>Private employers only:</b> the BLS tables behind these rates cover private industry, so government-run hospitals may not be included.</li>
+      <li><b>Small numbers swing:</b> rates for smaller industries move a lot from year to year. Use averages and multi-year change, not a single year.</li>
+      <li><b>No information about who caused the harm:</b> the data describes injured workers and settings only. High rates in psychiatric and residential settings reflect the intensity of care in those settings. They should not be read as a statement about people with mental illness or disabilities in general.</li>
+      <li><b>Serious event analyses are confidential:</b> data from incident reporting systems related to Serious Event analysis cannot be obtained or shared here. What happened in an event may be shared; the analysis of what led to it (root cause and contributing-factor findings) may not. This page uses only public, published data.</li>
+    </ul>
+  </section>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+const YEARS = ["2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021/22"];
+const DATA = [
+  ["Outpatient care centers", "6214", [2.5,4.7,4.2,4.1,3.2,2.9,3.1,3.9,4.8,5.2,2.9]],
+  ["Home health care services", "6216", [3.0,2.8,3.8,5.0,4.1,4.6,6.6,4.1,4.1,5.0,2.9]],
+  ["Other ambulatory health care services", "6219", [2.2,1.9,1.5,3.1,3.4,2.4,2.7,2.0,5.4,9.2,3.8]],
+  ["General medical and surgical hospitals", "6221", [5.0,5.8,6.8,6.7,6.6,7.2,8.0,9.7,9.4,14.3,12.9]],
+  ["Psychiatric and substance abuse hospitals", "6222", [64.5,69.6,85.1,109.5,84.6,82.7,121.1,124.9,107.5,114.2,110.4]],
+  ["Specialty hospitals (non-psychiatric)", "6223", [5.4,6.2,5.4,7.3,11.2,8.3,7.9,12.8,8.4,7.2,12.7]],
+  ["Nursing care facilities", "6231", [11.4,12.6,13.6,15.8,16.3,14.7,15.6,14.9,14.8,16.4,14.5]],
+  ["Residential disability, mental health and substance abuse facilities", "6232", [39.5,40.7,52.3,34.9,42.4,37.5,52.1,41.7,44.4,41.3,46.2]],
+  ["Retirement communities and assisted living", "6233", [8.2,10.2,8.6,7.2,10.0,8.4,9.0,8.5,10.0,13.7,10.5]],
+  ["Other residential care facilities", "6239", [35.2,31.8,40.6,39.9,43.8,63.0,40.2,61.0,59.4,34.8,45.8]],
+  ["Individual and family services", "6241", [5.5,9.6,7.3,10.2,9.6,15.2,9.9,14.7,9.1,7.2,10.2]],
+  ["Vocational rehabilitation services", "6243", [10.8,9.0,11.3,20.8,14.1,18.0,12.2,17.0,19.1,11.6,12.2]],
+].map(([name, naics, v]) => ({ name, naics, v, avg: v.reduce((a, b) => a + b, 0) / v.length }));
+
+const state = { year: YEARS.length - 1, sel: "6221", hideOutlier: false, sortKey: "name", sortDir: 1 };
+const $ = id => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const f1 = x => x.toFixed(1);
+const pct = (a, b) => `${b >= a ? "+" : ""}${Math.round((b - a) / a * 100)}%`;
+// Change is measured between 3-year averages (earliest vs latest three single years), not single
+// end years: single years swing a lot in small industries, and 2021/22 is a two-year period,
+// so end-point comparisons would exaggerate or hide change.
+const BASE = [0, 1, 2], RECENT = [7, 8, 9];
+const avgOf = (v, idx) => idx.reduce((a, i) => a + v[i], 0) / idx.length;
+const change = v => { const a = avgOf(v, BASE), b = avgOf(v, RECENT); return { a, b, pct: (b - a) / a * 100, pts: b - a }; };
+const chgText = v => { const c = change(v); return Math.abs(c.pct) < 10 ? "About flat" : `${c.pct > 0 ? "+" : ""}${Math.round(c.pct)}%`; };
+const CHANGE_LABEL = "2011-13 avg vs 2018-20 avg";
+const el = (tag, attrs = {}, parent) => {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+const tip = $("tip");
+function showTip(html, x, y) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const r = tip.getBoundingClientRect();
+  tip.style.left = Math.min(x + 14, innerWidth - r.width - 8) + "px";
+  tip.style.top = Math.max(8, y - r.height - 10) + "px";
+}
+const hideTip = () => { tip.style.opacity = 0; };
+
+// Theme toggle (works both ways against the OS setting)
+$("themeBtn").onclick = () => {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = document.documentElement.dataset.theme || (dark ? "dark" : "light");
+  document.documentElement.dataset.theme = cur === "dark" ? "light" : "dark";
+};
+
+function kpis() {
+  const last = YEARS.length - 1;
+  const psych = DATA.find(d => d.naics === "6222");
+  const changes = DATA.map(d => change(d.v).pct).sort((a, b) => a - b);
+  const mid = changes.length / 2;
+  const median = changes.length % 2 ? changes[Math.floor(mid)] : (changes[mid - 1] + changes[mid]) / 2;
+  const rose = changes.filter(c => c >= 10).length, flat = changes.filter(c => Math.abs(c) < 10).length;
+  const items = [
+    ["10.4 vs 2.1", "injuries per 10,000 workers: healthcare and social assistance vs. all private industry", "BLS fact sheet, 2018; same measure for both"],
+    [f1(psych.v[last]), "per 10,000 workers at psychiatric and substance abuse hospitals, the highest facility type", `${YEARS[last]}; reflects the care setting, not patients with mental illness in general`],
+    [`${median > 0 ? "+" : ""}${Math.round(median)}%`, "median change across the 12 facility types", CHANGE_LABEL],
+    [`${rose} of ${DATA.length}`, `facility types rose by 10% or more; ${flat} stayed about flat`, CHANGE_LABEL],
+  ];
+  $("kpis").innerHTML = items.map(([v, l, s]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div><div class="s">${s}</div></div>`).join("");
+}
+
+function bars() {
+  const rows = DATA.filter(d => !(state.hideOutlier && d.naics === "6222"))
+    .map(d => ({ ...d, val: d.v[state.year] }))
+    .sort((a, b) => b.val - a.val);
+  $("rankSub").textContent = `Rate per 10,000 full-time workers in ${YEARS[state.year]}. Click a bar to drill down.`;
+  const W = 520, rowH = 30, labelW = 250, H = rows.length * rowH + 24;
+  const max = Math.max(...rows.map(r => r.val));
+  const x = v => (W - labelW - 44) * v / max;
+  const box = $("bars"); box.innerHTML = "";
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Ranked bar chart of rates by facility type" }, box);
+  // recessive gridlines
+  const ticks = niceTicks(max, 4);
+  ticks.forEach(t => {
+    el("line", { x1: labelW + x(t), x2: labelW + x(t), y1: 0, y2: H - 20, stroke: "var(--grid)" }, svg);
+    el("text", { x: labelW + x(t), y: H - 4, "text-anchor": "middle" }, svg).textContent = t;
+  });
+  rows.forEach((r, i) => {
+    const y = i * rowH;
+    const g = el("g", { class: "bar-row" + (r.naics === state.sel ? " sel" : ""), tabindex: 0, role: "button", "aria-label": `${r.name}: ${f1(r.val)}` }, svg);
+    el("rect", { class: "bar-hit", x: 0, y, width: W, height: rowH, fill: "transparent", rx: 6 }, g);
+    const name = r.name.length > 38 ? r.name.slice(0, 36) + "…" : r.name;
+    el("text", { class: "lbl", x: labelW - 10, y: y + rowH / 2 + 4, "text-anchor": "end" }, g).textContent = name;
+    const w = Math.max(x(r.val), 2);
+    el("path", { d: roundedRight(labelW, y + 7, w, rowH - 14, 4), fill: r.naics === state.sel ? "var(--series-1)" : "var(--series-1-soft)" }, g);
+    el("text", { x: labelW + w + 6, y: y + rowH / 2 + 4, style: "fill:var(--text-primary)" }, g).textContent = f1(r.val);
+    const tipHtml = `<div>${r.name}</div><b>${f1(r.val)}</b> per 10,000 in ${YEARS[state.year]}<br><span style="color:var(--text-muted)">11-year average ${f1(r.avg)}</span>`;
+    g.addEventListener("mousemove", e => showTip(tipHtml, e.clientX, e.clientY));
+    g.addEventListener("mouseleave", hideTip);
+    const pick = () => { state.sel = r.naics; renderAll(); };
+    g.addEventListener("click", pick);
+    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+  });
+}
+
+function roundedRight(x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  return `M${x},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h - r}Q${x + w},${y + h} ${x + w - r},${y + h}H${x}Z`;
+}
+
+function niceTicks(max, n) {
+  const step0 = max / n, mag = 10 ** Math.floor(Math.log10(step0));
+  const step = [1, 2, 5, 10].map(m => m * mag).find(s => s >= step0);
+  const out = []; for (let t = 0; t <= max + 1e-9; t += step) out.push(+t.toFixed(6));
+  return out;
+}
+
+function line() {
+  const d = DATA.find(x => x.naics === state.sel);
+  $("detailTitle").textContent = d.name;
+  $("legSel").textContent = d.name.length > 40 ? d.name.slice(0, 38) + "…" : d.name;
+  const W = 480, H = 260, L = 36, R = 12, T = 12, B = 26;
+  const pool = DATA.filter(x => !(state.hideOutlier && x.naics === "6222" && x.naics !== state.sel));
+  const max = Math.max(...d.v, ...pool.filter(x => x.naics !== "6222" || x.naics === state.sel).flatMap(x => x.v)) * 1.08;
+  const xs = i => L + (W - L - R) * i / (YEARS.length - 1);
+  const ys = v => T + (H - T - B) * (1 - v / max);
+  const box = $("line"); box.innerHTML = "";
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Line chart of ${d.name} rate by year` }, box);
+  niceTicks(max, 4).forEach(t => {
+    if (t > max) return;
+    el("line", { x1: L, x2: W - R, y1: ys(t), y2: ys(t), stroke: "var(--grid)" }, svg);
+    el("text", { x: L - 6, y: ys(t) + 4, "text-anchor": "end" }, svg).textContent = t;
+  });
+  YEARS.forEach((y, i) => {
+    if (i % 2 === 0 || i === YEARS.length - 1) el("text", { x: xs(i), y: H - 6, "text-anchor": "middle" }, svg).textContent = y;
+  });
+  const path = v => v.map((val, i) => `${i ? "L" : "M"}${xs(i)},${ys(Math.min(val, max))}`).join("");
+  // context lines (psychiatric hospitals are clipped away unless selected, so the scale stays readable)
+  pool.filter(x => x.naics !== d.naics && x.naics !== "6222").forEach(x =>
+    el("path", { d: path(x.v), fill: "none", stroke: "var(--context)", "stroke-width": 1.25 }, svg));
+  // selected year marker
+  el("rect", { x: xs(state.year) - 9, y: T, width: 18, height: H - T - B, fill: "var(--grid)", rx: 4 }, svg);
+  el("path", { d: path(d.v), fill: "none", stroke: "var(--series-1)", "stroke-width": 2.5, "stroke-linejoin": "round" }, svg);
+  const cross = el("line", { y1: T, y2: H - B, stroke: "var(--text-muted)", "stroke-dasharray": "3 3", opacity: 0 }, svg);
+  d.v.forEach((val, i) => {
+    el("circle", { cx: xs(i), cy: ys(val), r: i === state.year ? 5.5 : 4, fill: "var(--series-1)", stroke: "var(--accent-ring)", "stroke-width": 2 }, svg);
+  });
+  el("text", { x: xs(state.year), y: ys(d.v[state.year]) - 12, "text-anchor": "middle", style: "fill:var(--text-primary);font-weight:600" }, svg).textContent = f1(d.v[state.year]);
+  // hover layer: one hit column per year
+  YEARS.forEach((y, i) => {
+    const hit = el("rect", { x: xs(i) - (W - L - R) / (YEARS.length - 1) / 2, y: T, width: (W - L - R) / (YEARS.length - 1), height: H - T - B, fill: "transparent", style: "cursor:pointer" }, svg);
+    const prev = i ? d.v[i - 1] : null;
+    const html = `<div>${y}</div><b>${f1(d.v[i])}</b> per 10,000` + (prev != null ? `<br><span style="color:var(--text-muted)">${d.v[i] >= prev ? "+" : ""}${f1(d.v[i] - prev)} vs ${YEARS[i - 1]}</span>` : "");
+    hit.addEventListener("mousemove", e => { cross.setAttribute("x1", xs(i)); cross.setAttribute("x2", xs(i)); cross.setAttribute("opacity", 1); showTip(html, e.clientX, e.clientY); });
+    hit.addEventListener("mouseleave", () => { cross.setAttribute("opacity", 0); hideTip(); });
+    hit.addEventListener("click", () => { state.year = i; $("yearSel").value = i; renderAll(); });
+  });
+  const peak = d.v.indexOf(Math.max(...d.v));
+  $("detailStats").innerHTML = [
+    [f1(d.v[state.year]), `Rate in ${YEARS[state.year]}`],
+    [chgText(d.v), `Change, ${CHANGE_LABEL}`],
+    [`${f1(d.v[peak])}`, `Peak (${YEARS[peak]})`],
+  ].map(([v, l]) => `<div><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+}
+
+function table() {
+  const cols = [{ key: "name", label: "Facility type" }, ...YEARS.map((y, i) => ({ key: i, label: y })), { key: "avg", label: "Avg" }, { key: "chg", label: "Change*" }];
+  const val = (d, k) => k === "name" ? d.name : k === "avg" ? d.avg : k === "chg" ? change(d.v).pct : d.v[k];
+  const rows = [...DATA].sort((a, b) => {
+    const A = val(a, state.sortKey), B = val(b, state.sortKey);
+    return (typeof A === "string" ? A.localeCompare(B) : A - B) * state.sortDir;
+  });
+  const arrow = k => state.sortKey === k ? (state.sortDir > 0 ? " ▲" : " ▼") : "";
+  $("tbl").innerHTML =
+    `<thead><tr>${cols.map(c => `<th data-k="${c.key}">${c.label}${arrow(c.key)}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map(d => `<tr data-n="${d.naics}" class="${d.naics === state.sel ? "sel" : ""}"><td>${d.name}</td>` +
+      d.v.map((v, i) => `<td class="${i === state.year ? "hl" : ""}">${f1(v)}</td>`).join("") +
+      `<td>${f1(d.avg)}</td><td>${chgText(d.v)}</td></tr>`).join("") + "</tbody>";
+  $("tbl").querySelectorAll("th").forEach(th => th.onclick = () => {
+    const k = th.dataset.k, key = isNaN(k) ? k : +k;
+    state.sortDir = state.sortKey === key ? -state.sortDir : (key === "name" ? 1 : -1);
+    state.sortKey = key; table();
+  });
+  $("tbl").querySelectorAll("tbody tr").forEach(tr => tr.onclick = () => { state.sel = tr.dataset.n; renderAll(); });
+}
+
+function renderAll() { hideTip(); bars(); line(); table(); }
+
+$("yearSel").innerHTML = YEARS.map((y, i) => `<option value="${i}">${y}</option>`).join("");
+$("yearSel").value = state.year;
+$("yearSel").onchange = e => { state.year = +e.target.value; renderAll(); };
+$("hideOutlier").onchange = e => { state.hideOutlier = e.target.checked; if (state.hideOutlier && state.sel === "6222") state.sel = "6221"; renderAll(); };
+kpis(); renderAll();
+</script>
+</body>
+</html>
