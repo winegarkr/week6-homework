@@ -45,6 +45,17 @@ The scripts use plain Python and do not need extra installs.
 
 If the BLS website blocks the download, Claude will ask you to open the page in your browser, save it, and share the saved file.
 
+## View the dashboard
+
+An interactive dashboard of the research is on the `feature/skill` branch:
+https://github.com/winegarkr/week6-homework/blob/feature/skill/workplace-violence-dashboard.html
+
+GitHub shows the dashboard's code at that link, not the finished page. To see the dashboard:
+
+1. Open the link above.
+2. Click **Download raw file** (the download arrow at the top right of the file).
+3. Open the downloaded `workplace-violence-dashboard.html` file in your web browser.
+
 ## Rules the skill follows
 
 - Every number is given with its source and year. Missing numbers are reported as missing, never guessed.
